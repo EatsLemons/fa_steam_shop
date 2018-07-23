@@ -13,7 +13,12 @@ import (
 )
 
 var opts struct {
-	Port int `long:"port" env:"FA_STEAM_SHOP_PORT" default:"8081" description:"port"`
+	Port int `long:"port" env:"FA_SHOP_PORT" default:"8081" description:"port"`
+
+	SteamShopAddress string `long:"steam-shop-address" env:"FA_STEAM_SHOP_ADDRESS" default:"https://steamcommunity.com" description:"Steam API domain"`
+
+	RedisConnect string `long:"redis-connection" env:"FA_REDIS_CACHE_CONNECT" default:":6379" description:"Redis connection string"`
+	RedisTTL     int    `long:"redis-ttl" env:"FA_REDIS_TTL" default:"360" description:"Redis cache time to live in seconds"`
 }
 
 func main() {
@@ -28,8 +33,8 @@ func main() {
 	log.Println("Started with:")
 	log.Printf("%+v", opts)
 
-	shopAPI := shop.NewSteamAPI("https://steamcommunity.com")
-	cache := storage.NewRedisCache(":6379", 10)
+	shopAPI := shop.NewSteamAPI(opts.SteamShopAddress)
+	cache := storage.NewRedisCache(opts.RedisConnect, opts.RedisTTL)
 
 	srv := rest.Rest{
 		ShopService: shopAPI,
